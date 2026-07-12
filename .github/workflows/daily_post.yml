@@ -1,0 +1,30 @@
+name: Daily Telegram Post
+
+on:
+  schedule:
+    # UTC vaqtida yoziladi. O'zbekiston UTC+5, shuning uchun
+    # soat 18:00 (mahalliy) = 13:00 UTC
+    - cron: '0 13 * * *'
+  workflow_dispatch:  # Qo'lda ham ishga tushirish imkonini beradi
+
+jobs:
+  send-post:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Kodni yuklab olish
+        uses: actions/checkout@v4
+
+      - name: Python o'rnatish
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Kutubxonalarni o'rnatish
+        run: |
+          pip install anthropic python-telegram-bot python-dotenv Pillow apscheduler requests
+
+      - name: Postni yuborish
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID }}
+        run: python main.py
