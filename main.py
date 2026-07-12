@@ -6,6 +6,9 @@ from telegram_publisher import send_text_post, send_photo_post
 
 
 async def run_daily_telegram_post():
+    index = get_current_topic_index()
+    topic, category = TOPICS_ROTATION[index % len(TOPICS_ROTATION)]
+    
     # Bugungi kun tartib raqamiga qarab mavzu tanlanadi
     day_index = datetime.datetime.now().timetuple().tm_yday  # yilning nechanchi kuni
     topic, category = TOPICS_ROTATION[day_index % len(TOPICS_ROTATION)]
@@ -34,3 +37,10 @@ async def run_daily_telegram_post():
 
 if __name__ == "__main__":
     asyncio.run(run_daily_telegram_post())
+import datetime
+
+def get_current_topic_index():
+    now = datetime.datetime.now()
+    day_of_year = now.timetuple().tm_yday
+    hour_slot = 0 if now.hour < 8 else (1 if now.hour < 14 else 2)  # ertalab/kunduzi/kechqurun
+    return day_of_year * 3 + hour_slot
