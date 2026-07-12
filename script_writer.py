@@ -8,21 +8,52 @@ load_dotenv()
 MODE = "mock"  # Kalit kelganda shu yerni "real" ga o'zgartirasan
 
 
+import random
+
+HOOK_TEMPLATES = [
+    "Bilasizmi, {topic} sohasida hammani hayratda qoldirgan narsa bor?",
+    "{topic} — bu mavzuni 90% odam noto'g'ri tushunadi!",
+    "Agar siz {topic} bilan qiziqsangiz, buni albatta bilishingiz kerak.",
+    "Nega hammada {topic} haqida gap ketmoqda? Keling, bilib olamiz.",
+    "{topic} — kelajakni o'zgartirayotgan mavzu!",
+]
+
+MAIN_TEMPLATES = [
+    "{topic} sohasida so'nggi paytda katta o'zgarishlar bo'lmoqda. Mutaxassislar bu yo'nalish yaqin kelajakda yanada rivojlanishini bashorat qilishmoqda. Buni o'rganish — hoziroq boshlash uchun ajoyib fursat.",
+    "Ko'pchilik {topic} bilan tanishishni murakkab deb o'ylaydi, lekin aslida to'g'ri yondashuv bilan buni har kim o'zlashtira oladi. Asosiysi — muntazam mashq qilish va amaliyotda qo'llash.",
+    "{topic} nafaqat texnologik, balki iqtisodiy jihatdan ham katta imkoniyatlar ochmoqda. Ko'plab kompaniyalar va frilanserlar bu sohadan daromad topmoqda.",
+]
+
+OUTRO_TEMPLATES = [
+    "Ko'proq foydali kontent uchun kanalga obuna bo'ling! 🚀",
+    "Fikringizni izohlarda yozing, muhokama qilamiz! 💬",
+    "Do'stlaringiz bilan ulashing, bilim tarqatish — savob! 🙌",
+]
+
+HASHTAG_SETS = [
+    "#AI #Texnologiya #Uzbekistan",
+    "#SunIyIntellekt #IT #Kelajak",
+    "#Python #Dasturlash #AI",
+    "#Freelance #AI #Daromad",
+]
+
+
 def generate_content_mock(topic: str, category: str) -> dict:
-    """
-    Bu funksiya Claude'ni CHAQIRMAYDI — faqat sinov uchun
-    qo'lda tayyorlangan namuna javob qaytaradi.
-    Real funksiya bilan bir xil JSON tuzilmasini beradi,
-    shuning uchun qolgan kod (Telegram, Video) buni farqlamaydi.
-    """
+    hook = random.choice(HOOK_TEMPLATES).format(topic=topic)
+    main = random.choice(MAIN_TEMPLATES).format(topic=topic)
+    outro = random.choice(OUTRO_TEMPLATES)
+    hashtags = random.choice(HASHTAG_SETS)
+
+    telegram_post = f"🤖 {hook}\n\n{main}\n\n{outro}\n\n{hashtags}"
+
     return {
-        "telegram_post": f"🤖 {topic} haqida qiziqarli fakt! Bu — {category} sohasidagi eng so'nggi yangilik. #AI #Texnologiya #Uzbekistan",
-        "shorts_hook": f"Bilasizmi, {topic} butunlay o'zgartirib yubordi!",
-        "shorts_main": f"{topic} qanday ishlashini va nima uchun bu muhimligini tushuntiramiz. Bu texnologiya kelajakda yanada rivojlanadi.",
-        "shorts_outro": "Ko'proq bilish uchun kanalga obuna bo'ling!",
+        "telegram_post": telegram_post,
+        "shorts_hook": hook,
+        "shorts_main": main,
+        "shorts_outro": outro,
         "youtube_title": f"{topic} — Bilishingiz kerak bo'lgan narsa",
-        "youtube_description": f"{topic} haqida qisqa va tushunarli video. #AI #Tech",
-        "youtube_tags": ["AI", "texnologiya", "uzbekistan", topic.lower()]
+        "youtube_description": f"{topic} haqida qisqa va tushunarli video. {hashtags}",
+        "youtube_tags": [topic.lower(), "AI", "texnologiya", "uzbekistan"]
     }
 
 
@@ -77,11 +108,21 @@ if __name__ == "__main__":
     print(json.dumps(result, indent=2, ensure_ascii=False))
 
 TOPICS_ROTATION = [
-    ("Yangi AI modellar va vositalar", "AI/texnologiya"),
-    ("AI yordamida pul topish usullari", "AI/texnologiya"),
-    ("Python dasturlash maslahatlari", "AI/texnologiya"),
-    ("AI vositalar sharhi", "AI/texnologiya"),
-    ("Kelajak texnologiyalari", "AI/texnologiya"),
+    ("Claude AI imkoniyatlari", "AI/texnologiya"),
+    ("ChatGPT vs Claude taqqoslash", "AI/texnologiya"),
+    ("AI orqali frilanserlik", "AI/texnologiya"),
+    ("Python o'rganish yo'llari", "AI/texnologiya"),
+    ("Machine Learning asoslari", "AI/texnologiya"),
+    ("AI vositalar bilan pul topish", "AI/texnologiya"),
+    ("ChatGPT prompting sirlar", "AI/texnologiya"),
+    ("AI va kelajak kasblar", "AI/texnologiya"),
+    ("No-code AI vositalar", "AI/texnologiya"),
+    ("AI agentlar nima va qanday ishlaydi", "AI/texnologiya"),
+    ("Data Science boshlang'ich qadamlar", "AI/texnologiya"),
+    ("AI bilan video yaratish", "AI/texnologiya"),
+    ("GitHub Copilot va AI kod yozish", "AI/texnologiya"),
+    ("AI etikasi va xavfsizligi", "AI/texnologiya"),
+    ("Startaplar va AI investitsiyalar", "AI/texnologiya"),
 ]
 
 def get_today_content(day_index: int) -> dict:
