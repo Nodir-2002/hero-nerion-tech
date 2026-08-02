@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Rejim: "mock" (test, bepul) yoki "real" (Claude API, pullik)
-MODE = "mock"  # Kalit kelganda shu yerni "real" ga o'zgartirasan
+MODE = "real"  # Kalit kelganda shu yerni "real" ga o'zgartirasan
 
 
 import random
@@ -82,13 +82,30 @@ Javobni FAQAT JSON formatida qaytar, boshqa hech narsa yozma:
   "youtube_tags": ["tag1", "tag2"]
 }}
 """
-    msg = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=800,
-        messages=[{"role": "user", "content": prompt}]
-    )
-    text = msg.content[0].text.strip().replace("```json", "").replace("```", "")
-    return json.loads(text)
+
+    try:
+        msg = client.messages.create(
+            model="claude-sonnet-5",
+            max_tokens=1500,
+            messages=[{"role": "user", "content": prompt}]
+        )
+
+        text_blocks = [block.text for block in msg.content if block.type == "text"]
+        if not text_blocks:
+            raise ValueError("Javobda matn bloki topilmadi (faqat thinking bo'lishi mumkin)")
+
+        text = text_blocks[0].strip().replace("```json", "").replace("```", "")
+
+        start = text.find("{")
+        end = text.rfind("}") + 1
+        json_text = text[start:end]
+
+        return json.loads(json_text)
+
+    except Exception as e:
+        print(f"⚠️ Claude API xatolik: {e}")
+        print("Mock rejimga o'tilmoqda...")
+        return generate_content_mock(topic, category)
 
 
 def generate_content(topic: str, category: str) -> dict:
@@ -128,3 +145,28 @@ TOPICS_ROTATION = [
 def get_today_content(day_index: int) -> dict:
     topic, category = TOPICS_ROTATION[day_index % len(TOPICS_ROTATION)]
     return generate_content(topic, category)
+
+def generate_content_real(topic: str, category: str) -> dict:
+    import anthropic
+    client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+
+    prompt = f"""..."""  # o'zgarishsiz qoladi
+
+    try:
+        msg = client.messages.create(
+            model="claude-sonnet-5",
+            max_tokens=800,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        text = msg.content[0].text.strip()
+        # JSON qismini xavfsiz ajratib olish
+        start = text.find("{")
+        end = text.rfind("}") + 1
+        json_text = text[start:end]
+        return json.loads(json_text)
+    except (json.JSONDecodeError, Exception) as e:
+        print(f"⚠️ Claude javobini parse qilishda xatolik: {e}")
+        print("Mock rejimga o'tilmoqda...")
+        return generate_content_mock(topic, category)  # fallback
+
+
