@@ -120,10 +120,6 @@ def generate_content(topic: str, category: str) -> dict:
         return generate_content_real(topic, category)
 
 
-if __name__ == "__main__":
-    result = generate_content("Claude AI'ning yangi imkoniyatlari", "AI/texnologiya")
-    print(json.dumps(result, indent=2, ensure_ascii=False))
-
 TOPICS_ROTATION = [
     ("Claude AI imkoniyatlari", "AI/texnologiya"),
     ("ChatGPT vs Claude taqqoslash", "AI/texnologiya"),
@@ -142,31 +138,12 @@ TOPICS_ROTATION = [
     ("Startaplar va AI investitsiyalar", "AI/texnologiya"),
 ]
 
+
 def get_today_content(day_index: int) -> dict:
     topic, category = TOPICS_ROTATION[day_index % len(TOPICS_ROTATION)]
     return generate_content(topic, category)
 
-def generate_content_real(topic: str, category: str) -> dict:
-    import anthropic
-    client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
-    prompt = f"""..."""  # o'zgarishsiz qoladi
-
-    try:
-        msg = client.messages.create(
-            model="claude-sonnet-5",
-            max_tokens=800,
-            messages=[{"role": "user", "content": prompt}]
-        )
-        text = msg.content[0].text.strip()
-        # JSON qismini xavfsiz ajratib olish
-        start = text.find("{")
-        end = text.rfind("}") + 1
-        json_text = text[start:end]
-        return json.loads(json_text)
-    except (json.JSONDecodeError, Exception) as e:
-        print(f"⚠️ Claude javobini parse qilishda xatolik: {e}")
-        print("Mock rejimga o'tilmoqda...")
-        return generate_content_mock(topic, category)  # fallback
-
-
+if __name__ == "__main__":
+    result = generate_content("Claude AI'ning yangi imkoniyatlari", "AI/texnologiya")
+    print(json.dumps(result, indent=2, ensure_ascii=False))
