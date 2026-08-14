@@ -36,9 +36,7 @@ CONTENT_ANGLES = [
 ]
 
 
-def generate_content_mock(topic: str, category: str) -> dict:
-    # ... (o'zgarishsiz, fallback uchun saqlanadi)
-    pass
+
 
 
 def generate_content_real(topic: str, category: str) -> dict:
