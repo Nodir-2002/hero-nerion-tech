@@ -25,7 +25,6 @@ TOPICS_ROTATION = [
     ("Startaplar va AI investitsiyalar", "AI/texnologiya"),
 ]
 
-# Har bir post turi uchun turli "burchak" (angle) — takrorlanishni kamaytirish uchun
 CONTENT_ANGLES = [
     "amaliy maslahat va qadamlar bilan",
     "statistika va real raqamlar bilan",
@@ -35,8 +34,51 @@ CONTENT_ANGLES = [
     "real hayotiy misol yoki case-study orqali",
 ]
 
+HOOK_TEMPLATES = [
+    "Bilasizmi, {topic} sohasida hammani hayratda qoldirgan narsa bor?",
+    "{topic} — bu mavzuni 90% odam noto'g'ri tushunadi!",
+    "Agar siz {topic} bilan qiziqsangiz, buni albatta bilishingiz kerak.",
+    "Nega hammada {topic} haqida gap ketmoqda? Keling, bilib olamiz.",
+    "{topic} — kelajakni o'zgartirayotgan mavzu!",
+]
+
+MAIN_TEMPLATES = [
+    "{topic} sohasida so'nggi paytda katta o'zgarishlar bo'lmoqda. Mutaxassislar bu yo'nalish yaqin kelajakda yanada rivojlanishini bashorat qilishmoqda. Buni o'rganish — hoziroq boshlash uchun ajoyib fursat.",
+    "Ko'pchilik {topic} bilan tanishishni murakkab deb o'ylaydi, lekin aslida to'g'ri yondashuv bilan buni har kim o'zlashtira oladi. Asosiysi — muntazam mashq qilish va amaliyotda qo'llash.",
+    "{topic} nafaqat texnologik, balki iqtisodiy jihatdan ham katta imkoniyatlar ochmoqda. Ko'plab kompaniyalar va frilanserlar bu sohadan daromad topmoqda.",
+]
+
+OUTRO_TEMPLATES = [
+    "Ko'proq foydali kontent uchun kanalga obuna bo'ling! 🚀",
+    "Fikringizni izohlarda yozing, muhokama qilamiz! 💬",
+    "Do'stlaringiz bilan ulashing, bilim tarqatish — savob! 🙌",
+]
+
+HASHTAG_SETS = [
+    "#AI #Texnologiya #Uzbekistan",
+    "#SunIyIntellekt #IT #Kelajak",
+    "#Python #Dasturlash #AI",
+    "#Freelance #AI #Daromad",
+]
 
 
+def generate_content_mock(topic: str, category: str) -> dict:
+    hook = random.choice(HOOK_TEMPLATES).format(topic=topic)
+    main = random.choice(MAIN_TEMPLATES).format(topic=topic)
+    outro = random.choice(OUTRO_TEMPLATES)
+    hashtags = random.choice(HASHTAG_SETS)
+
+    telegram_post = f"🤖 {hook}\n\n{main}\n\n{outro}\n\n{hashtags}"
+
+    return {
+        "telegram_post": telegram_post,
+        "shorts_hook": hook,
+        "shorts_main": main,
+        "shorts_outro": outro,
+        "youtube_title": f"{topic} — Bilishingiz kerak bo'lgan narsa",
+        "youtube_description": f"{topic} haqida qisqa va tushunarli video. {hashtags}",
+        "youtube_tags": [topic.lower(), "AI", "texnologiya", "uzbekistan"]
+    }
 
 
 def generate_content_real(topic: str, category: str) -> dict:
@@ -45,7 +87,7 @@ def generate_content_real(topic: str, category: str) -> dict:
 
     angle = random.choice(CONTENT_ANGLES)
 
-    system_prompt = """Sen O'zbekistondagi eng mashhur IT/texnologiya Telegram kanali uchun professional kontent yozuvchisan. 
+    system_prompt = """Sen O'zbekistondagi eng mashhur IT/texnologiya Telegram kanali uchun professional kontent yozuvchisan.
 
 Sening auditoriyang: 18-35 yoshli, IT sohasiga qiziquvchi, dasturchi bo'lish yoki frilanserlikda pul topishni xohlaydigan o'zbek yoshlari.
 
@@ -65,20 +107,20 @@ Quyidagilarni yoz:
 
 1. TELEGRAM POST (250-400 belgi):
    - Diqqatni tortadigan ochilish jumlasi
-   - 1-2 ta ANIQ fakt, raqam yoki misol (o'ylab topma, umumiy ma'lumotlarga tayan)
+   - 1-2 ta ANIQ fakt, raqam yoki misol
    - Qisqa, kuchli xulosa yoki chaqiruv
-   - 2-3 ta mos emoji (ortiqcha emas)
+   - 2-3 ta mos emoji
    - Oxirida 3-4 ta hashtag
 
 2. YOUTUBE SHORTS SKRIPTI (40-45 soniya, taxminan 100-120 so'z):
-   - HOOK (birinchi 3 soniya — juda kuchli, tomoshabinni to'xtatadigan)
-   - MAIN (asosiy qism — 1 ta aniq g'oya, chuqur emas lekin foydali)
-   - OUTRO (chaqiruv — obuna, izoh, ulashish)
+   - HOOK (birinchi 3 soniya)
+   - MAIN (asosiy qism)
+   - OUTRO (chaqiruv)
 
 3. YOUTUBE METADATA:
-   - Sarlavha (60 belgidan kam, qiziqarli, lekin aniq)
+   - Sarlavha (60 belgidan kam)
    - Tavsif (2-3 jumla + hashtag)
-   - Teglar (5-7 ta, izlash uchun qulay so'zlar)
+   - Teglar (5-7 ta)
 
 Javobni FAQAT quyidagi JSON formatida qaytar, boshqa hech qanday matn, izoh yoki markdown belgisi qo'shma:
 {{
@@ -91,8 +133,12 @@ Javobni FAQAT quyidagi JSON formatida qaytar, boshqa hech qanday matn, izoh yoki
   "youtube_tags": ["tag1", "tag2", "..."]
 }}"""
 
-
-       
+    try:
+        msg = client.messages.create(
+            model="claude-sonnet-5",
+            max_tokens=2000,
+            system=system_prompt,
+            messages=[{"role": "user", "content": user_prompt}]
         )
 
         text_blocks = [block.text for block in msg.content if block.type == "text"]
@@ -106,7 +152,6 @@ Javobni FAQAT quyidagi JSON formatida qaytar, boshqa hech qanday matn, izoh yoki
 
         result = json.loads(json_text)
 
-        # Minimal validatsiya — bo'sh maydonlar bo'lsa fallback
         required_keys = ["telegram_post", "shorts_hook", "shorts_main", "shorts_outro"]
         if not all(result.get(k) for k in required_keys):
             raise ValueError("Javobda kerakli maydonlar to'liq emas")
