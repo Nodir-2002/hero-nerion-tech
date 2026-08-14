@@ -93,13 +93,8 @@ Javobni FAQAT quyidagi JSON formatida qaytar, boshqa hech qanday matn, izoh yoki
   "youtube_tags": ["tag1", "tag2", "..."]
 }}"""
 
-    try:
-        msg = client.messages.create(
-            model="claude-sonnet-5",
-            max_tokens=2000,
-            temperature=0.9,  # yuqoriroq = ko'proq xilma-xillik, kamroq takrorlanish
-            system=system_prompt,
-            messages=[{"role": "user", "content": user_prompt}]
+
+       
         )
 
         text_blocks = [block.text for block in msg.content if block.type == "text"]
