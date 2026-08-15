@@ -23,7 +23,7 @@ jobs:
 
       - name: Kutubxonalarni o'rnatish
         run: |
-          pip install anthropic python-telegram-bot python-dotenv Pillow apscheduler requests
+          pip install anthropic python-telegram-bot python-dotenv Pillow apscheduler requests google-genai
 
       - name: Postni yuborish
         env:
